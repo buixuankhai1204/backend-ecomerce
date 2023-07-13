@@ -25,4 +25,8 @@ module.exports = class productService {
         }
         return product;
     }
+
+    static async getProductByNameAndDecription(req, next) {
+
+    }
 }

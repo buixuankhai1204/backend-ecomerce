@@ -147,7 +147,6 @@ module.exports = class Auth {
         await user.save();
 
         this.createToken(user, res, 200);
-
         return user;
     }
 

@@ -24,7 +24,7 @@ module.exports = class APIFeature {
            this.query = this.query.sort(sortBy).allowDiskUse(true);
         }
         else {
-            this.query = this.query.sort('name');
+            // this.query = this.query.sort('name');
         }
 
         return this;
