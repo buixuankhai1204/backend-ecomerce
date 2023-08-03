@@ -12,7 +12,7 @@ module.exports = class factoryApi {
 
     static async updateDocument(doc, data, next, id) {
 
-        const document = await doc.findOneAndUpdate({_id: id}, data, {
+        const document = await doc.findByIdAndUpdate({_id: id}, data, {
             runValidators: true,
             new: true
         }).lean();
@@ -46,11 +46,7 @@ module.exports = class factoryApi {
 
     static async getAllDocument(req, next, doc) {
         let features = new apiFeature(doc, req.query).filter().sort().paginate();
-        // const features = new APIFeatures1(doc.find(), req.query)
-        //     .filter()
-        //     .sort()
-        //     .paginate();
-        const document = await features.query.explain().then(console.log);
+        const document = await features.query;
 
         return document;
     }

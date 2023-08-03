@@ -1,6 +1,7 @@
 const productModel = require('../model/productModel');
 const factoryApi = require('../utils/factoryApiService');
 const crypto = require("crypto");
+const redis = require("../redis/redis");
 
 module.exports = class product {
     static async createProduct(req, res, next) {
@@ -40,8 +41,9 @@ module.exports = class product {
     }
 
     static async getProduct(req, res, next) {
+        const redisKey = `productId:${req.params.id}`;
         const product = await factoryApi.getOneDocument(productModel, next, req.body.id, null);
-
+        await redis.set(redisKey, JSON.stringify(product));
         if (product) {
             res.status(200).json({
                 status: 'success',
