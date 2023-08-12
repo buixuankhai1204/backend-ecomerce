@@ -6,7 +6,7 @@ const catchError = require('../utils/CatchError');
 const router = express.Router();
 
 router.route('/getAllUser').get(catchError(authService.protect),catchError(userController.apiGetAllUser));
-router.route('/getUser').get(catchError(authService.protect),catchError(userController.apiGetUserById));
+router.route('/getUser').get(catchError(authService.protect),catchError(userController.getUser));
 router.route('/updateUser/:id').patch(catchError(authService.protect),catchError(userController.apiUpdateUser));
 router.route('/me').get(catchError(authService.protect),catchError(userController.apiGetCurrentUser));
 

@@ -9,9 +9,15 @@ const hpp = require('hpp');
 
 const userRouter = require('./router/userRouter');
 const productRouter = require('./router/productRouter');
+const chatRouter = require('./router/chatRouter');
 const errorHandle = require('./controller/errorHandleController');
 const AppError = require("./utils/appError");
 const app = new express();
+const consumer = require('./service/messageSyncQueue/kafka');
+const authService = require('./service/user/authService');
+const catchError = require('./utils/CatchError');
+
+
 var cors = require('cors');
 
 app.use(helmet());
@@ -55,10 +61,15 @@ app.use(cors());
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/product', productRouter);
+app.use('/api/v1/chat', chatRouter);
 
+app.get('/', catchError(authService.protect), async (req, res) => {
+    await consumer.receiveMessageFromQueue( req.user._id);
+})
 app.all('*', (req, res, next) => {
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
+
 
 app.use(errorHandle);
 

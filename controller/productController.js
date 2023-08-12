@@ -42,7 +42,7 @@ module.exports = class product {
 
     static async getProduct(req, res, next) {
         const redisKey = `productId:${req.params.id}`;
-        const product = await factoryApi.getOneDocument(productModel, next, req.body.id, null);
+        const product = await factoryApi.getOneDocument(productModel, next, req.params.id, null);
         await redis.set(redisKey, JSON.stringify(product));
         if (product) {
             res.status(200).json({
