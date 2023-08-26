@@ -8,7 +8,7 @@ const productService = require('../service/product/productService');
 const productCache = require('../redis/productCache');
 const router = express.Router();
 
-router.route('/createProduct').post(catchAsync(authSerivce.protect),catchAsync(productController.createProduct));
+router.route('/createProduct').post(catchAsync(productController.createProduct));
 router.route('/getAllProduct').get(catchAsync(productController.getAllProduct));
 router.route('/getProduct/:id').get(catchAsync(productScore.updateProductScore),catchAsync(productCache.productIdCacheData),catchAsync(productController.getProduct));
 router.route('/getTopProductView').get(catchAsync(productCache.getTopScoreProduct), catchAsync(productCache.setTop10ScoreProduct));

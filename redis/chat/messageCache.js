@@ -1,41 +1,53 @@
 const redis = require("../redis");
-var cron = require('node-cron');
-const messageModel = require("../../model/messageModel");
-const chatServiceService = require("../../service/chat/chatService");
+
 module.exports = class messageCache {
     static async messageIdCacheData(req, res, next) {
         const redisKey = `messageId:${req.body.content}`;
         const cachedResult = await redis.get(redisKey);
         if (!cachedResult) {
-            next();
+            return null;
         } else {
-            res.status(200).json({
-                status: 'success',
-                data: JSON.parse(cachedResult),
-                message: "lay san pham thanh cong"
-            })
+            return JSON.parse(cachedResult);
         }
     }
 
-    static async messageIdSetCache(req, res, next) {
-        const redisKey = `messageId:${req.message._id}`;
-        const cachedResult = await redis.set(redisKey, req.body.content);
-        next();
+    static async messageIdSetCache(messageFrom, messageDocument) {
+        const redisKey = `messageId:${messageFrom}`;
+        const cachedResult = await redis.set(redisKey, JSON.stringify(messageDocument));
+        if(cachedResult) {
+            return cachedResult;
+        } else {
+            return null;
+        }
     }
 
-    static async messageListCache(req, res, next) {
-        let rediskey = `messageFrom:messageTo:${req.user._id}:${req.params.messageTo}`;
+    static async cacheMessageToListMessageByMessageId(channelId,messageId, document) {
+        let rediskey = `channelId:${channelId}`;
+        let messageInsert = `messageFrom:document:${messageId}:${JSON.stringify(document)}`
+        await redis.LPUSH(rediskey, messageInsert);
         let len = await redis.LLEN(rediskey);
-        if (len == 0) {
-            rediskey = `messageFrom:messageTo:${req.body.messageTo}:${req.user._id}`;
-        }
-        //req.body.content is set in pre middleware
-        await redis.LPUSH(rediskey, req.body.content);
-        len = await redis.LLEN(rediskey);
-        if(len > 100) {
+        if (len > 100) {
             await redis.RPOP(rediskey);
         }
-        next();
-
     }
+
+    static async getListMessagesCacheByChannelId(channelId) {
+        let listMessageResult = [];
+        let rediskey = `channelId:${channelId}`;
+        let listMessages = await redis.LRANGE(rediskey, 0, -1);
+        if (!listMessages) {
+            return null;
+        }
+
+        for (let message in listMessages) {
+            const messagePart = message.split(':');
+            let messageObj = JSON.parse(messagePart[3]);
+            listMessageResult.push(messageObj);
+        }
+
+        return listMessages;
+    }
+
+
+
 }

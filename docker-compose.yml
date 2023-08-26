@@ -1,0 +1,53 @@
+version: '3.1'
+services:
+  api-node:
+    image: buixuankhai1204/node-web-app:latest
+    build:
+      context: .
+      dockerfile: dockerfile
+    depends_on:
+      - mongodb
+      - redis
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    networks:
+      - backend
+#  chat-system:
+#    image: buixuankhai1204/chat-system:latest
+#    build:
+#      context: .
+#      dockerfile: ../chat-system/chat/chatsystem.Dockerfile
+#    depends_on:
+#      - mongodb
+#      - redis
+#    ports:
+#      - 8080:8080
+#    restart: unless-stopped
+#    networks:
+#      - backend
+  redis:
+    image: redis:7.2.0-alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis_cache:/data
+    restart: always
+    networks:
+      - backend
+  mongodb:
+    image: mongo:latest
+    environment:
+      - MONGODB_DATABASE="BackendProject"
+    ports:
+      - 27017:27017
+    networks:
+      - backend
+    volumes:
+      - ./mongodb:/var/lib/mongodb/data
+networks:
+  backend:
+    external: true
+
+
+

@@ -17,7 +17,6 @@ const consumer = require('./service/messageSyncQueue/kafka');
 const authService = require('./service/user/authService');
 const catchError = require('./utils/CatchError');
 
-
 var cors = require('cors');
 
 app.use(helmet());
@@ -62,15 +61,22 @@ app.use(cors());
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/product', productRouter);
 app.use('/api/v1/chat', chatRouter);
+var cookieParser = require('cookie-parser')
+const {receiveMessageFromQueue} = require("./service/messageSyncQueue/kafka");
+app.use(cookieParser())
+var path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', catchError(authService.protect), async (req, res) => {
-    await consumer.receiveMessageFromQueue( req.user._id);
-})
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+app.get('/api/v1/login', (req, res) => {
+    res.sendFile(__dirname + '/login.html');
+});
+
 app.all('*', (req, res, next) => {
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
-
-
 app.use(errorHandle);
 
 module.exports = app;

@@ -1,18 +1,14 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-    messageFrom: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'User',
+    channelId: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'Channel',
         req: [true, 'tin nhắn phải được liên kết với người gửi']
     },
-    messageTo: {
+    messageFrom: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User',
         req: [true, 'tin nhắn phải được liên kết với người nhận']
     },
-    user: [{
-        type: mongoose.Schema.Types.ObjectId, ref: 'User',
-        req: [true, 'sản phẩm phải được liên kết với người tạo sản phẩm']
-    }],
     content: {
         type: String,
         req: [true, 'nội dung không được để trống'],
@@ -23,9 +19,6 @@ const messageSchema = new mongoose.Schema({
     }
 });
 
-messageSchema.pre('save', async function (req, res, next) {
-
-})
 const messageModel = mongoose.model('Message', messageSchema);
 
 module.exports = messageModel;

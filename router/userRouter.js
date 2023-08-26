@@ -14,5 +14,6 @@ router.route('/signup').post(catchError(authController.signUp));
 router.route('/signin').post(catchError(authController.signIn));
 router.route('/forgotPassword').post(catchError(authController.forgotPassword));
 router.route('/resetPassword/:token').patch(catchError(authController.resetPassword));
+router.route('/userStatus').patch(catchError(authService.protect), catchError(authController.updateStatusUserOnlineOrOffLine));
 
 module.exports = router;

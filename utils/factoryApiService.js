@@ -1,13 +1,15 @@
-const AppError = require("./appError");
+const AppError = require("../utils/appError");
 const apiFeature = require("../utils/APIFeature");
 const APIFeatures1 = require("./APIFeature1");
 module.exports = class factoryApi {
-    static async createDocument(doc, data, next) {
+    static async createDocument(doc, data) {
         const document = await doc.create(data);
         if(!document) {
-            return next(new AppError('không thể tạo mới document', 401));
+            return new AppError('không thể tạo mới document', 401);
         }
-        return document
+        if (document) {
+            return document;
+        }
     }
 
     static async updateDocument(doc, data, next, id) {
@@ -16,7 +18,7 @@ module.exports = class factoryApi {
             runValidators: true,
             new: true
         }).lean();
-        if(!document) {
+        if (!document) {
             return next(new AppError('không thể cập nhật document', 401));
         }
 
@@ -25,7 +27,7 @@ module.exports = class factoryApi {
 
     static async deleteDocument(doc, next, id) {
         const document = await doc.findOneAndDelete({_id: id});
-        if(!document) {
+        if (!document) {
             return next(new AppError('không thể xóa document', 401));
         }
 
@@ -34,10 +36,10 @@ module.exports = class factoryApi {
 
     static async getOneDocument(doc, next, id, popOptions) {
         let document = await doc.findById(id).lean();
-        if(popOptions) {
+        if (popOptions) {
             document = document.populate(popOptions).lean();
         }
-        if(!document) {
+        if (!document) {
             return next(new AppError('không có document cần tìm với id này!', 401));
         }
 

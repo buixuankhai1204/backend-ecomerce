@@ -6,7 +6,17 @@ const messageCache = require('../redis/chat/messageCache');
 const kafka = require('../service/messageSyncQueue/kafka');
 const router = express.Router();
 
-router.route('/user/:id').post(catchError(authService.protect),catchError(chatController.createMessageChat), catchError(messageCache.messageIdSetCache),catchError(messageCache.messageListCache), catchError(kafka.sendMessageToQueue));
+router.route('/channel/:id').get(
+    catchError(authService.protect), catchError(chatController.getAllChannelByUserId),
+)
+router.route('/channel').post(
+    catchError(authService.protect), catchError(chatController.createChannel),
+)
+
+router.route('/message/:channelId').get(
+    catchError(authService.protect), catchError(chatController.getAllMessageByChannelId),
+
+)
 
 
 module.exports = router;

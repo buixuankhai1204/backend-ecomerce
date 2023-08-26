@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket.IO chat</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"
+            integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+</head>
+<body>
+<div class="wrapper">
+    <div class="container">
+        <div class="left">
+            <div class="top">
+                <input type="text" placeholder="Search"/>
+                <a href="javascript:;" class="search"></a>
+            </div>
+            <ul class="people" id="people">
+
+            </ul>
+        </div>
+        <div class="right">
+            <div class="top"><span>To: <span class="name">Dog Woofson</span></span></div>
+            <div class="chat active-chat" id="chat-container">
+                <div class="conversation-start">
+                    <span>Today, 6:48 AM</span>
+                </div>
+
+            </div>
+
+            <form id="form" action="">
+                <div class="write">
+                    <a href="javascript:;" class="write-link attach"></a>
+                    <input id="input" type="text"/>
+                    <a href="javascript:;" class="write-link smiley"></a>
+                    <a href="javascript:;" class="write-link send"></a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<!--<ul id="messages"></ul>-->
+<!--<form id="form" action="">-->
+<!--    <input id="input" autocomplete="off" /><button>Send</button>-->
+<!--</form>-->
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+)
+<script>
+
+    let friends = {
+            list: document.querySelector('ul.people'),
+            all: document.querySelectorAll('.left .person'),
+            name: ''
+        },
+        chat = {
+            container: document.querySelector('.container .right'),
+            current: null,
+            person: null,
+            name: document.querySelector('.container .right .top .name')
+        }
+
+    friends.all.forEach(f => {
+        f.addEventListener('mousedown', () => {
+            f.classList.contains('active') || setActiveChat(f)
+        })
+    });
+    const parseCookies = function (cookie) {
+        const list = {};
+        if (!cookie) return list;
+        cookie.split(`;`).forEach(function (cookie) {
+            let [name, ...rest] = cookie.split(`=`);
+            name = name?.trim();
+            if (!name) return;
+            const value = rest.join(`=`).trim();
+            if (!value) return;
+            list[name] = decodeURIComponent(value);
+        });
+
+        return list;
+    }
+
+    function setActiveChat(f) {
+        friends.list.querySelector('.active').classList.remove('active')
+        f.classList.add('active')
+        console.log(friends.name);
+        chat.name.innerHTML = friends.name
+    }
+
+
+    var baseUrl = "http://127.0.0.1:3000/api/v1/";
+    console.log(baseUrl + 'chat/channel/' + parseCookies(document.cookie)['userId']);
+
+    var done = $.ajax({
+        url: baseUrl + 'chat/channel/' + parseCookies(document.cookie)['userId'],
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + parseCookies(document.cookie)['jwt']
+        },
+        dataType: "json",
+    });
+    done.done(function (data) {
+        var chat_container = document.getElementById('people');
+        var html = "";
+        for (let i = 0; i < data['data'].length; i++) {
+            html += '<li class="person"  onclick="fun(this)" data-name="' + data['data'][i]['name'] + '" data-user-id="' + data['data'][i]['userId'] + '" data-channel-id="' + data['data'][i]['_id'] + '" data-chat="person' + i + '">' +
+                '<img src="" alt=""/>' +
+                '<span class="name nameList" >' + data['data'][i]['name'] + '</span>' +
+                // '<span class="time">' + data['data'][i]['createdAt']+ '</span>' +
+                '</li>';
+            chat_container.innerHTML = html;
+        }
+    })
+    let channelId = '';
+    let userId = '';
+    function fun(animal) {
+        friends.name = animal.getAttribute("data-name");
+        chat.name.innerHTML = friends.name
+        let dataChannelId = animal.getAttribute("data-channel-id");
+        let dataUserId = animal.getAttribute("data-user-id");
+        channelId = dataChannelId;
+        userId = dataUserId;
+        var done = $.ajax({
+            url: baseUrl + 'chat/message/' + dataChannelId,
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + parseCookies(document.cookie)['jwt']
+            },
+            dataType: "json",
+        });
+        done.done(function (data) {
+            var chat_container = document.getElementById("chat-container");
+            var html = "";
+            var className = '';
+            for (let i = 0; i < data['data'].length; i++) {
+                if (data['data'][i]['messageFrom'] === parseCookies(document.cookie)['userId']) {
+                    className = 'me';
+                } else {
+                    className = 'you';
+                }
+                html += '<div class="bubble ' + className + '">' +
+                    '<span>' + data['data'][i]['content'] + '</span>' + '</div>'
+            }
+            chat_container.innerHTML = html;
+            console.log(data);
+        })
+    }
+
+    var socket = io('http://127.0.0.1:8080/');
+    var form = document.getElementById('form');
+    var input = document.getElementById('input');
+    var chat_container = document.getElementById('chat-container');
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (input.value) {
+            const objSend = {
+                content: input.value,
+                userId: userId,
+                userFrom: parseCookies(document.cookie)['userId'],
+                channelId: channelId
+            }
+            socket.emit('chat message', objSend);
+            var div = document.createElement('div');
+            chat_container.appendChild(div);
+            var html = "";
+            html += '<div class="bubble me"' +
+                '<span>' + input.value + '</span>' + '</div>'
+            input.value = '';
+            div.innerHTML = html;
+        }
+    });
+    socket.on(parseCookies(document.cookie)['userId'], function (msg) {
+        console.log("afasfaf");
+        var data = JSON.parse(msg);
+        var item = document.createElement('div');
+        item.textContent = data.content;
+        item.classList.add('bubble');
+        item.classList.add('you');
+        chat_container.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+
+
+</script>
+</body>
+</html>

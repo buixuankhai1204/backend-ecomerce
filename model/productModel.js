@@ -4,7 +4,7 @@ const productSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Vui lòng nhập tên sản phẩm!'],
-        unique: true
+        unique: false
     },
     title: {
         type: String,

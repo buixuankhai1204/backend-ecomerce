@@ -8,6 +8,7 @@ const sendMail = require('../mail/sendMailService');
 const crypto = require("crypto");
 const shoppingSessionModel = require('../../model/shoppingSessionModel');
 const factoryApi = require('../../utils/factoryApiService');
+const userStatusModel = require('../../model/userStatusModel')
 module.exports = class Auth {
 
     static signToken(id) {
@@ -27,8 +28,10 @@ module.exports = class Auth {
         };
         if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
-        res.cookie('jwt', token, cookieOptions);
         res.clearCookie('jwt');
+        res.clearCookie('userId');
+        res.cookie('jwt', token);
+        res.cookie('userId', user._id.toString());
 
         user.password = undefined;
         return token;
@@ -54,7 +57,6 @@ module.exports = class Auth {
 
     static async signIn(requestBody, res, next) {
         const {password, email} = requestBody;
-
         if (!email || !password) {
             return next(new AppError('bạn chưa nhập email hoặc mật khẩu!', 401));
         }
@@ -115,7 +117,7 @@ module.exports = class Auth {
 
         const mailObject = new sendMail();
         const subject = "đã gửi về email, vui lòng reset mật khẩu trong vòng 10 phút";
-        const message = `http://127.0.0.1:3000/api/v1/users/resetPassword/${token}`;
+        const message = `http://localhost:3000/api/v1/users/resetPassword/${token}`;
         console.log(message);
         const info = await mailObject.sendMail(req.email, subject, message);
 
@@ -150,5 +152,12 @@ module.exports = class Auth {
         return user;
     }
 
+    static async updateStatusUserOnlineOrOffLine(req, next) {
+        const userStatus = await userStatusModel.findOneAndUpdate({userId: req.body.id}, {status: req.body.status}, {upsert: true});
+        if (!userStatus) {
+            return next(new AppError('không thể cập nhật thông tin user', 401));
+        }
 
+        return userStatus;
+    }
 }
