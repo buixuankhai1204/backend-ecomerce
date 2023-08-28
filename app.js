@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -13,9 +12,6 @@ const chatRouter = require('./router/chatRouter');
 const errorHandle = require('./controller/errorHandleController');
 const AppError = require("./utils/appError");
 const app = new express();
-const consumer = require('./service/messageSyncQueue/kafka');
-const authService = require('./service/user/authService');
-const catchError = require('./utils/CatchError');
 
 var cors = require('cors');
 
@@ -62,7 +58,6 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/product', productRouter);
 app.use('/api/v1/chat', chatRouter);
 var cookieParser = require('cookie-parser')
-const {receiveMessageFromQueue} = require("./service/messageSyncQueue/kafka");
 app.use(cookieParser())
 var path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
