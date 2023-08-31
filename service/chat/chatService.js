@@ -50,7 +50,11 @@ module.exports = class chatService {
             if (!userInfo) {
                 return next(new AppError('khong tim thay user bang userInfo', 401));
             }
-            channels[i].name = userInfo.name;
+            if(channels[i].type == 0) {
+                channels[i].name = userInfo.name;
+            } else {
+                channels[i].name = channels[i].nameChannel;
+            }
             channels[i].userId = userInfo._id.toString();
         }
         return channels;
@@ -76,5 +80,19 @@ module.exports = class chatService {
 
     }
 
+    static async createChannelGroup(req, next) {
+        let userIdsObj = [];
+        let typeChannel = 1;
+        // 0: chat 1:1, 1: chat group
+        for (let i = 0; i < req.body.usersIds.length; i++) {
+             userIdsObj.push(mongoose.Types.ObjectId(req.body.userIds[i]));
+        }
+
+        let channelGroup = await channelModel.create({userIds: userIdsObj, type: typeChannel, nameChannel: req.body.nameChannel, idRoomOwner: req.user._id},);
+        if (!channelGroup) {
+        return next(new AppError('không tạo được channel group mới!', 401));
+        }
+        return channelGroup;
+    }
 
 }

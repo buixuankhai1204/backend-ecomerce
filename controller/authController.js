@@ -58,4 +58,16 @@ module.exports = class Auth {
             })
         }
     }
+
+    static async getUserInfoByUsername(req, res, next) {
+        const userInfo = await authService.getUserInfoByUsername(req, next);
+
+        if (userInfo) {
+            res.status(200).json({
+                status: 'success',
+                data: userInfo,
+                message: 'Update Thông tin user thành công!',
+            })
+        }
+    }
 }

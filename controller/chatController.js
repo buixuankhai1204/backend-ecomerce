@@ -48,4 +48,16 @@ static async getAllChannelByUserId(req, res, next) {
             })
         }
     }
+
+    static async createChannelGroup(req, res, next) {
+        const channelGroup = await chatService.createChannelGroup(req, next);
+
+        if (channelGroup) {
+            res.status(200).json({
+                status: 'success',
+                data: channelGroup,
+                message: 'tạo group thành công!',
+            })
+        }
+    }
 }

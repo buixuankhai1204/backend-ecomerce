@@ -15,8 +15,10 @@ router.route('/channel').post(
 
 router.route('/message/:channelId').get(
     catchError(authService.protect), catchError(chatController.getAllMessageByChannelId),
-
 )
 
+router.route('/channelGroup').post(
+    catchError(authService.protect), catchError(chatController.createChannelGroup),
+)
 
 module.exports = router;

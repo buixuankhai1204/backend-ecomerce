@@ -160,4 +160,13 @@ module.exports = class Auth {
 
         return userStatus;
     }
+
+    static async getUserInfoByUsername(req, next) {
+        const userInfo = await userModel.findOne({name : req.body.username});
+        if (!userInfo) {
+            return next(new AppError('không thể lấy  thông tin user bằng username', 401));
+        }
+
+        return userInfo;
+    }
 }
