@@ -55,7 +55,6 @@ module.exports = class chatService {
             } else {
                 channels[i].name = channels[i].nameChannel;
             }
-            channels[i].userId = userInfo._id.toString();
         }
         return channels;
     }
@@ -94,5 +93,7 @@ module.exports = class chatService {
         }
         return channelGroup;
     }
+
+
 
 }
