@@ -60,4 +60,17 @@ static async getAllChannelByUserId(req, res, next) {
             })
         }
     }
+
+    static async addMemberToGroup(req, res, next) {
+        const channelUpdate = await chatService.addMemberToGroup(req.body.channelId, req.body.userId, next);
+
+        if (channelUpdate) {
+            res.status(200).json({
+                status: 'success',
+                data: channelUpdate,
+                message: 'thêm mới thành viên thành công!'
+            })
+        }
+    }
+
 }

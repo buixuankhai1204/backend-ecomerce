@@ -31,7 +31,7 @@ module.exports = class chatService {
     }
 
     static async getAllChannelByUserId(req, next) {
-        let channels = await channelModel.aggregate([{$match: { userIds: mongoose.Types.ObjectId(req.params.id)}},
+        let channels = await channelModel.aggregate([{$match: {userIds: mongoose.Types.ObjectId(req.params.id)}},
         ]);
         console.log(channels);
         if (!channels) {
@@ -50,7 +50,7 @@ module.exports = class chatService {
             if (!userInfo) {
                 return next(new AppError('khong tim thay user bang userInfo', 401));
             }
-            if(channels[i].type == 0) {
+            if (channels[i].type == 0) {
                 channels[i].name = userInfo.name;
             } else {
                 channels[i].name = channels[i].nameChannel;
@@ -62,7 +62,7 @@ module.exports = class chatService {
     static async getAllMessageByChannelId(req, next) {
         let list100MessagesCache = await messageCache.getListMessagesCacheByChannelId(req.params.channelId);
         console.log(list100MessagesCache);
-        if(list100MessagesCache.length === 0) {
+        if (list100MessagesCache.length === 0) {
             let messages;
             messages = await messageModel.find({channelId: req.params.channelId});
             if (!messages) {
@@ -71,7 +71,7 @@ module.exports = class chatService {
             console.log(messages);
             for (let i = 0; i < messages.length; i++) {
                 console.log(messages[i]);
-                await messageCache.cacheMessageToListMessageByMessageId(messages[i].channelId, messages[i]._id,messages[i]);
+                await messageCache.cacheMessageToListMessageByMessageId(messages[i].channelId, messages[i]._id, messages[i]);
             }
             return messages;
         }
@@ -84,16 +84,44 @@ module.exports = class chatService {
         let typeChannel = 1;
         // 0: chat 1:1, 1: chat group
         for (let i = 0; i < req.body.usersIds.length; i++) {
-             userIdsObj.push(mongoose.Types.ObjectId(req.body.userIds[i]));
+            userIdsObj.push(mongoose.Types.ObjectId(req.body.userIds[i]));
         }
 
-        let channelGroup = await channelModel.create({userIds: userIdsObj, type: typeChannel, nameChannel: req.body.nameChannel, idRoomOwner: req.user._id},);
+        let channelGroup = await channelModel.create({
+            userIds: userIdsObj,
+            type: typeChannel,
+            nameChannel: req.body.nameChannel,
+            idRoomOwner: req.user._id
+        },);
         if (!channelGroup) {
-        return next(new AppError('không tạo được channel group mới!', 401));
+            return next(new AppError('không tạo được channel group mới!', 401));
         }
         return channelGroup;
     }
 
+    ststic
 
+    async addMemberToGroup(channelId, userId, next) {
+        let channel = await channelModel.findById(channelId);
+        if(!channel) {
+            return next(new AppError('không tìm thấy channel', 401));
+        }
+
+        let userIds = channel.userIds;
+        let isConstrains = userIds.constrain(userIds);
+        if(isConstrains === true) {
+            return next( new AppError('thành viên đã được thêm vào nhóm trứớc đó, vui lòng kiểm tra lại', 401));
+        }
+
+        userIds.push(userId);
+
+        let channelUpdate = await channelModel.findByIdAndUpdate(channelId, {userIds: userIds});
+
+        if(!channelUpdate) {
+            return next(new AppError('không thể thêm thành viên mới!!', 401));
+        }
+
+        return channelUpdate;
+    }
 
 }

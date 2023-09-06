@@ -21,4 +21,8 @@ router.route('/channelGroup').post(
     catchError(authService.protect), catchError(chatController.createChannelGroup),
 )
 
+router.route('/addUser').post(
+    catchError(authService.protect), catchError(chatController.addMemberToGroup)
+)
+
 module.exports = router;
