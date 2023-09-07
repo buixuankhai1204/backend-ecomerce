@@ -91,7 +91,8 @@ module.exports = class chatService {
             userIds: userIdsObj,
             type: typeChannel,
             nameChannel: req.body.nameChannel,
-            idRoomOwner: req.user._id
+            idRoomOwner: req.user._id,
+            adminIds: [req.user._id]
         },);
         if (!channelGroup) {
             return next(new AppError('không tạo được channel group mới!', 401));
