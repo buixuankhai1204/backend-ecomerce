@@ -4,6 +4,8 @@ const catchError = require('../utils/CatchError');
 const chatController = require('../controller/chatController');
 const messageCache = require('../redis/chat/messageCache');
 const kafka = require('../service/messageSyncQueue/kafka');
+const multer  = require('multer')
+const upload = multer({ dest: '../public/' })
 const router = express.Router();
 
 router.route('/channel/:id').get(
@@ -23,6 +25,10 @@ router.route('/channelGroup').post(
 
 router.route('/addUser').post(
     catchError(authService.protect), catchError(chatController.addMemberToGroup)
+)
+
+router.route('/sendFile/').post(
+    catchError(authService.protect), upload.single('avatar'), catchError(chatController.sendFile)
 )
 
 module.exports = router;

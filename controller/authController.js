@@ -5,6 +5,7 @@ const catchAsync = require('../utils/CatchError');
 const userModel = require('../model/userModel');
 module.exports = class Auth {
     static async signUp(req, res, next) {
+        console.log(req.formData);
         const user = await authService.signUp(req.body, res);
         // const user = catchAsync(await factoryApi.createDocument(userModel, req.body, next));
         if (user) {

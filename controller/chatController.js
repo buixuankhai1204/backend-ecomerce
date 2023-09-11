@@ -73,4 +73,17 @@ static async getAllChannelByUserId(req, res, next) {
         }
     }
 
+    static async sendFile(req, res, next) {
+        console.log(req.file);
+        // const channelUpdate = await chatService.sendFile(req.body.channelId, req.body.userId, req.body.file);
+        //d983e26858455c7a6858ca90c4c8803b
+        // if (channelUpdate) {
+        //     res.status(200).json({
+        //         status: 'success',
+        //         data: channelUpdate,
+        //         message: 'thêm mới thành viên thành công!'
+        //     })
+        // }
+    }
+
 }

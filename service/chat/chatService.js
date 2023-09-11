@@ -4,6 +4,9 @@ const userModel = require('../../model/userModel');
 const AppError = require("../../utils/appError");
 const messageCache = require("../../redis/chat/messageCache");
 const mongoose = require('mongoose');
+const multer  = require('multer')
+const upload = multer({ dest: '../public' })
+
 
 module.exports = class chatService {
     static async createMessageChat(channelId, userFrom, content) {
@@ -123,6 +126,15 @@ module.exports = class chatService {
         }
 
         return channelUpdate;
+    }
+
+    static async sendFile(channelId, usserId, file) {
+        console.log(file);
+        name = `${channelId}-${userId}-${file.name}`;
+        writeFile(`/file/${name}.img`, file, (err) => {
+            if (err) throw err;
+            console.log('The file has been saved!');
+        });
     }
 
 }
